@@ -24,6 +24,8 @@
         <!-- City Search -->
         <div class="mb-3">
             <input type="text" id="cityInput" class="form-control d-inline-block w-50" placeholder="Enter 5-Digit Zip Code" aria-label="Input for 5-Digit Zip Code">
+            <button class="btn btn-primary" onclick="fetchWeather()">Search</button>
+        </div>
 
         <!-- Current Weather Card -->
         <div class="card mx-auto shadow-lg" style="max-width: 400px;">
@@ -46,18 +48,14 @@
     <!-- JavaScript Code -->
     <script>
         function displayCurrentDate() {
-            const date = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateDate = new Date();
+            const objOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
         }
 
         function fetchWeather() {
-            const strZip = document.getElementById("#cityInput").value; //Zip is entered as a string per documentation
-            if (!strZip) {
-                alert("Please enter a city");
-                return;
-            }
-            if(strZip.length != 5){
+            const strZip = document.getElementById("#cityInput").value; //Zip is a string based on documentation
+            if (!strZip || strZip.length !== 5) {
                 alert("Please enter a 5-digit zip code");
                 return;
             }
@@ -76,12 +74,12 @@
                 })
                 .then(response => response.json())
                 .then(weatherData => {
-                    document.getElementById("cityName").innerText = objGeoLocation(strZip)[0].name;
-                    document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
-                    document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
-                    document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
-                    document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
-                    document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
+                    document.getElementById("#cityName").innerText = objGeoLocation(strZip)[0].name;
+                    document.getElementById("#temperature").innerText = `${weatherData.current.temperature_2m}°F`;
+                    document.getElementById("#windSpeed").innerText = weatherData.current.wind_speed_10m;
+                    document.getElementById("#rain").innerText = weatherData.current.rain ?? "0";
+                    document.getElementById("#humidity").innerText = weatherData.current.relative_humidity_2m;
+                    document.getElementById("#cloudCover").innerText = weatherData.current.cloud_cover;
 
                     let forecastHTML = "";
                     for (let i = 0; i < 5; i++) {
@@ -96,7 +94,7 @@
                             </div>
                         `;
                     }
-                    document.getElementById("hourlyForecast").innerHTML = forecastHTML;
+                    document.getElementById("#hourlyForecast").innerHTML = forecastHTML;
                 })
                 .catch(error => {
                     alert(error.message);
