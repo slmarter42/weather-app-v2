@@ -1,107 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Weather App</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <title>Weather App</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
 </head>
 <body class="bg-light text-dark">
-    <div class="container text-center mt-4">
-        <!-- Date Display with Icon -->
-        <h5 class="mb-3">
-            <i class="bi bi-calendar"></i> <span id="currentDate"></span>
-        </h5>
+  <div class="container text-center mt-4">
+    <!-- Date Display with Icon -->
+    <h5 class="mb-3">
+      <i class="bi bi-calendar"></i> <span id="currentDate"></span>
+    </h5>
 
-        <h1 class="mb-3">Weather App 🌤️</h1>
+    <h1 class="mb-3">Weather App 🌤️</h1>
 
-        <!-- City Search -->
-        <div class="mb-3">
-            <input type="text" id="cityInput" class="form-control d-inline-block w-70" placeholder="Enter 5-Digit Zip Code" aria-label="Input for 5-Digit Zip Code">
-            <button class="btn btn-primary" onclick="fetchWeather()">Search</button>
-        </div>
-
-        <!-- Current Weather Card -->
-        <div class="card mx-auto shadow-lg" style="max-width: 400px;">
-            <div class="card-body">
-                <h3 class="card-title" id="cityName">City Name</h3>
-                <h4 class="card-subtitle mb-2 text-muted" id="weatherDesc">Weather Description</h4>
-                <h2 id="temperature" class="fw-bold">--°F</h2>
-                <p><i class="bi bi-wind"></i> Wind Speed: <span id="windSpeed">--</span> mph</p>
-                <p><i class="bi bi-droplet"></i> Rain: <span id="rain">--</span> in</p>
-                <p><i class="bi bi-moisture"></i> Humidity: <span id="humidity">--</span>%</p>
-                <p><i class="bi bi-cloud"></i> Cloud Cover: <span id="cloudCover">--</span>%</p>
-            </div>
-        </div>
-
-        <!-- Hourly Forecast -->
-        <h3 class="mt-4">Next 5 Hours</h3>
-        <div class="row justify-content-center" id="hourlyForecast"></div>
+    <!-- ZIP Code Search -->
+    <div class="mb-3">
+      <input type="text" id="cityInput" class="form-control d-inline-block w-50" placeholder="Enter 5-digit ZIP code" />
+      <button class="btn btn-primary" onclick="fetchWeather()">Search</button>
     </div>
 
-    <!-- JavaScript Code -->
-    <script>
-        function displayCurrentDate() {
-            const dateDate = new Date();
-            const objOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
-        }
+    <!-- Current Weather Card -->
+    <div class="card mx-auto shadow-lg" style="max-width: 400px;">
+      <div class="card-body">
+        <h3 class="card-title" id="cityName">City Name</h3>
+        <h4 class="card-subtitle mb-2 text-muted" id="weatherDesc">Weather Description</h4>
+        <h2 id="temperature" class="fw-bold">--°F</h2>
+        <p><i class="bi bi-wind"></i> Wind Speed: <span id="windSpeed">--</span> mph</p>
+        <p><i class="bi bi-droplet"></i> Rain: <span id="rain">--</span> in</p>
+        <p><i class="bi bi-moisture"></i> Humidity: <span id="humidity">--</span>%</p>
+        <p><i class="bi bi-cloud"></i> Cloud Cover: <span id="cloudCover">--</span>%</p>
+      </div>
+    </div>
 
-        function fetchWeather() {
-            const strZip = document.getElementById("#cityInput").value; //Zip is a string based on documentation
-            if (!strZip || strZip.length !== 5) {
-                alert("Please enter a 5-digit zip code");
-                return;
-            }
+    <!-- Hourly Forecast -->
+    <h3 class="mt-4">Next 5 Hours</h3>
+    <div class="row justify-content-center" id="hourlyForecast"></div>
+  </div>
 
-            // Get coordinates from city name
-            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${objGeoLocation(strZip)}&count=1`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.results || data.results.length === 0) {
-                        throw new Error("City not found");
-                    }
+  <!-- JavaScript Code -->
+  <script>
+    function displayCurrentDate() {
+      const date = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
+    }
 
-                    const { latitude, longitude, name } = data.results[0];
+    function fetchWeather(zip = "38501") {
+      const zipInput = document.getElementById("cityInput");
+      // If the input is empty, set the default ZIP code
+      if (!zipInput.value.trim()) {
+        zipInput.value = zip;
+      }
+      // Use the ZIP code from the input as the search query
+      let query = zipInput.value.trim();
 
-                    return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
-                })
-                .then(response => response.json())
-                .then(weatherData => {
-                    document.getElementById("#cityName").innerText = objGeoLocation(strZip)[0].name;
-                    document.getElementById("#temperature").innerText = `${weatherData.current.temperature_2m}°F`;
-                    document.getElementById("#windSpeed").innerText = weatherData.current.wind_speed_10m;
-                    document.getElementById("#rain").innerText = weatherData.current.rain ?? "0";
-                    document.getElementById("#humidity").innerText = weatherData.current.relative_humidity_2m;
-                    document.getElementById("#cloudCover").innerText = weatherData.current.cloud_cover;
+      fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en`)
+        .then(response => response.json())
+        .then(data => {
+          if (!data.results || data.results.length === 0) {
+            throw new Error("Location not found");
+          }
+          const { latitude, longitude, name } = data.results[0];
+          return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`)
+            .then(response => response.json())
+            .then(weatherData => ({ weatherData, name }));
+        })
+        .then(({ weatherData, name }) => {
+          document.getElementById("cityName").innerText = name;
+          zipInput.value = name; // Update input field with the confirmed city name
+          document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
+          document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
+          document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
+          document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
+          document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
 
-                    let forecastHTML = "";
-                    for (let i = 0; i < 5; i++) {
-                        const hourTime = new Date(weatherData.hourly.time[i]).getHours();
-                        forecastHTML += `
-                            <div class="col-2 text-center p-2 border rounded bg-white">
-                                <p class="fw-bold">${hourTime}:00</p>
-                                <i class="bi bi-thermometer-half"></i>
-                                <p>${weatherData.hourly.temperature_2m[i]}°F</p>
-                                <i class="bi bi-wind"></i>
-                                <p>${weatherData.hourly.wind_speed_10m[i]} mph</p>
-                            </div>
-                        `;
-                    }
-                    document.getElementById("#hourlyForecast").innerHTML = forecastHTML;
-                })
-                .catch(error => {
-                    alert(error.message);
-                });
-        }
+          let forecastHTML = "";
+          for (let i = 0; i < 5; i++) {
+            const hourTime = new Date(weatherData.hourly.time[i]).getHours();
+            forecastHTML += `
+              <div class="col-2 text-center p-2 border rounded bg-white">
+                <p class="fw-bold">${hourTime}:00</p>
+                <i class="bi bi-thermometer-half"></i>
+                <p>${weatherData.hourly.temperature_2m[i]}°F</p>
+                <i class="bi bi-wind"></i>
+                <p>${weatherData.hourly.wind_speed_10m[i]} mph</p>
+              </div>
+            `;
+          }
+          document.getElementById("hourlyForecast").innerHTML = forecastHTML;
+        })
+        .catch(error => {
+          alert(error.message);
+        });
+    }
 
-        displayCurrentDate();
-    </script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchWeather("38501"); // Load default weather for Cookeville, TN by ZIP
+    });
+
+    displayCurrentDate();
+  </script>
 </body>
 </html>
