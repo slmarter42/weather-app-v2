@@ -1,6 +1,6 @@
 {
-    "name": "MySiteTitle",
-    "short_name": "MySite",
+    "name": "CurrentWeather",
+    "short_name": "Weather",
     "start_url": "https://slmarter42.github.io/weather-app-v2/",
     "display": "standalone",
     "background_color": "#ffffff",
