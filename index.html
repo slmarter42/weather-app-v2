@@ -23,9 +23,7 @@
 
         <!-- City Search -->
         <div class="mb-3">
-            <input type="text" id="cityInput" class="form-control d-inline-block w-50" placeholder="Enter city">
-            <button class="btn btn-primary" onclick="fetchWeather()">Search</button>
-        </div>
+            <input type="text" id="cityInput" class="form-control d-inline-block w-50" placeholder="Enter 5-Digit Zip Code" aria-label="Input for 5-Digit Zip Code">
 
         <!-- Current Weather Card -->
         <div class="card mx-auto shadow-lg" style="max-width: 400px;">
@@ -54,14 +52,18 @@
         }
 
         function fetchWeather() {
-            const city = document.getElementById("cityInput").value;
-            if (!city) {
+            const strZip = document.getElementById("#cityInput").value; //Zip is entered as a string per documentation
+            if (!strZip) {
                 alert("Please enter a city");
+                return;
+            }
+            if(strZip.length != 5){
+                alert("Please enter a 5-digit zip code");
                 return;
             }
 
             // Get coordinates from city name
-            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`)
+            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${objGeoLocation(strZip)}&count=1`)
                 .then(response => response.json())
                 .then(data => {
                     if (!data.results || data.results.length === 0) {
@@ -74,7 +76,7 @@
                 })
                 .then(response => response.json())
                 .then(weatherData => {
-                    document.getElementById("cityName").innerText = city;
+                    document.getElementById("cityName").innerText = objGeoLocation(strZip)[0].name;
                     document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
                     document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
                     document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
