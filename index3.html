@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Weather App</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+<body class="bg-light text-dark">
+    <div class="container text-center mt-4">
+        <!-- Date Display with Icon -->
+        <h5 class="mb-3">
+            <i class="bi bi-calendar"></i> <span id="currentDate"></span>
+        </h5>
+
+        <h1 class="mb-3">Weather App 🌤️</h1>
+
+        <!-- City Search -->
+        <div class="mb-3">
+            <input type="text" id="cityInput" class="form-control d-inline-block w-50" placeholder="Enter city">
+            <button class="btn btn-primary" onclick="fetchWeather()">Search</button>
+        </div>
+
+        <!-- Current Weather Card -->
+        <div class="card mx-auto shadow-lg" style="max-width: 400px;">
+            <div class="card-body">
+                <h3 class="card-title" id="cityName">City Name</h3>
+                <h4 class="card-subtitle mb-2 text-muted" id="weatherDesc">Weather Description</h4>
+                <h2 id="temperature" class="fw-bold">--°F</h2>
+                <p><i class="bi bi-wind"></i> Wind Speed: <span id="windSpeed">--</span> mph</p>
+                <p><i class="bi bi-droplet"></i> Rain: <span id="rain">--</span> in</p>
+                <p><i class="bi bi-moisture"></i> Humidity: <span id="humidity">--</span>%</p>
+                <p><i class="bi bi-cloud"></i> Cloud Cover: <span id="cloudCover">--</span>%</p>
+            </div>
+        </div>
+
+        <!-- Hourly Forecast -->
+        <h3 class="mt-4">Next 5 Hours</h3>
+        <div class="row justify-content-center" id="hourlyForecast"></div>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        function displayCurrentDate() {
+            const date = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
+        }
+
+        function fetchWeather() {
+            const city = document.getElementById("cityInput").value.trim();
+            if (!city) {
+                alert("Please enter a city");
+                return;
+            }
+
+            // Get coordinates from city name
+            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.results || data.results.length === 0) {
+                        throw new Error("City not found");
+                    }
+
+                    const { latitude, longitude, name } = data.results[0];
+
+                    return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
+                })
+                .then(response => response.json())
+                .then(weatherData => {
+                    document.getElementById("cityName").innerText = city;
+                    document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
+                    document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
+                    document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
+                    document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
+                    document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
+
+                    let forecastHTML = "";
+                    for (let i = 0; i < 5; i++) {
+                        const hourTime = new Date(weatherData.hourly.time[i]).getHours();
+                        forecastHTML += `
+                            <div class="col-2 text-center p-2 border rounded bg-white">
+                                <p class="fw-bold">${hourTime}:00</p>
+                                <i class="bi bi-thermometer-half"></i>
+                                <p>${weatherData.hourly.temperature_2m[i]}°F</p>
+                                <i class="bi bi-wind"></i>
+                                <p>${weatherData.hourly.wind_speed_10m[i]} mph</p>
+                            </div>
+                        `;
+                    }
+                    document.getElementById("hourlyForecast").innerHTML = forecastHTML;
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        }
+
+        displayCurrentDate();
+    </script>
+</body>
+</html>
