@@ -40,10 +40,6 @@
         <p><i class="bi bi-cloud"></i> Cloud Cover: <span id="cloudCover">--</span>%</p>
       </div>
     </div>
-
-    <!-- Hourly Forecast -->
-    <h3 class="mt-4">Next 5 Hours</h3>
-    <div class="row justify-content-center" id="hourlyForecast"></div>
   </div>
 
   <!-- JavaScript Code -->
@@ -77,7 +73,7 @@
         const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
         const weatherData = await weatherResponse.json();
 
-        // Update the UI with the weather data
+        // Update the UI with the current weather data
         document.getElementById("cityName").innerText = name;
         zipInput.value = name; // update the input field with the confirmed city name
         document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
@@ -85,22 +81,6 @@
         document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
         document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
         document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
-
-        // Update the hourly forecast (next 5 hours)
-        let forecastHTML = "";
-        for (let i = 0; i < 5; i++) {
-          const hourTime = new Date(weatherData.hourly.time[i]).getHours();
-          forecastHTML += `
-            <div class="col-2 text-center p-2 border rounded bg-white">
-              <p class="fw-bold">${hourTime}:00</p>
-              <i class="bi bi-thermometer-half"></i>
-              <p>${weatherData.hourly.temperature_2m[i]}°F</p>
-              <i class="bi bi-wind"></i>
-              <p>${weatherData.hourly.wind_speed_10m[i]} mph</p>
-            </div>
-          `;
-        }
-        document.getElementById("hourlyForecast").innerHTML = forecastHTML;
       } catch (error) {
         alert(error.message);
       }
