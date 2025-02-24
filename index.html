@@ -48,63 +48,67 @@
 
   <!-- JavaScript Code -->
   <script>
+    // Display the current date
     function displayCurrentDate() {
       const date = new Date();
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
     }
 
-    function fetchWeather(zip = "38501") {
-      const zipInput = document.getElementById("cityInput");
-      // If the input is empty, set the default ZIP code
-      if (!zipInput.value.trim()) {
-        zipInput.value = zip;
+    // Async function to fetch weather data using a ZIP code (default: "38501")
+    async function fetchWeather(zip = "38501") {
+      try {
+        const zipInput = document.getElementById("cityInput");
+        // If input is empty, set to default ZIP code
+        if (!zipInput.value.trim()) {
+          zipInput.value = zip;
+        }
+        let query = zipInput.value.trim();
+
+        // Use the geocoding API to get latitude, longitude, and city name
+        const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en`);
+        const geoData = await geoResponse.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          throw new Error("Location not found");
+        }
+        const { latitude, longitude, name } = geoData.results[0];
+
+        // Use the coordinates to fetch weather data
+        const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
+        const weatherData = await weatherResponse.json();
+
+        // Update the UI with the weather data
+        document.getElementById("cityName").innerText = name;
+        zipInput.value = name; // update the input field with the confirmed city name
+        document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
+        document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
+        document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
+        document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
+        document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
+
+        // Update the hourly forecast (next 5 hours)
+        let forecastHTML = "";
+        for (let i = 0; i < 5; i++) {
+          const hourTime = new Date(weatherData.hourly.time[i]).getHours();
+          forecastHTML += `
+            <div class="col-2 text-center p-2 border rounded bg-white">
+              <p class="fw-bold">${hourTime}:00</p>
+              <i class="bi bi-thermometer-half"></i>
+              <p>${weatherData.hourly.temperature_2m[i]}°F</p>
+              <i class="bi bi-wind"></i>
+              <p>${weatherData.hourly.wind_speed_10m[i]} mph</p>
+            </div>
+          `;
+        }
+        document.getElementById("hourlyForecast").innerHTML = forecastHTML;
+      } catch (error) {
+        alert(error.message);
       }
-      // Use the ZIP code from the input as the search query
-      let query = zipInput.value.trim();
-
-      fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en`)
-        .then(response => response.json())
-        .then(data => {
-          if (!data.results || data.results.length === 0) {
-            throw new Error("Location not found");
-          }
-          const { latitude, longitude, name } = data.results[0];
-          return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`)
-            .then(response => response.json())
-            .then(weatherData => ({ weatherData, name }));
-        })
-        .then(({ weatherData, name }) => {
-          document.getElementById("cityName").innerText = name;
-          zipInput.value = name; // Update input field with the confirmed city name
-          document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
-          document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
-          document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
-          document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
-          document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
-
-          let forecastHTML = "";
-          for (let i = 0; i < 5; i++) {
-            const hourTime = new Date(weatherData.hourly.time[i]).getHours();
-            forecastHTML += `
-              <div class="col-2 text-center p-2 border rounded bg-white">
-                <p class="fw-bold">${hourTime}:00</p>
-                <i class="bi bi-thermometer-half"></i>
-                <p>${weatherData.hourly.temperature_2m[i]}°F</p>
-                <i class="bi bi-wind"></i>
-                <p>${weatherData.hourly.wind_speed_10m[i]} mph</p>
-              </div>
-            `;
-          }
-          document.getElementById("hourlyForecast").innerHTML = forecastHTML;
-        })
-        .catch(error => {
-          alert(error.message);
-        });
     }
 
+    // Run default weather fetch for the default ZIP ("38501") when the page loads
     document.addEventListener("DOMContentLoaded", () => {
-      fetchWeather("38501"); // Load default weather for Cookeville, TN by ZIP
+      fetchWeather("38501");
     });
 
     displayCurrentDate();
