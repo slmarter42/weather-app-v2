@@ -1,24 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
-    <meta charset="UTF-8"> 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <meta name="apple-mobile-web-app-capable" content="yes"> 
-    <meta name="apple-mobile-web-app-status-bar-style" content="black"> 
-    <title>Weather App</title> 
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico"> 
-    <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone60x60.png"> 
-    <link rel="apple-touch-icon" sizes="60x60" href="images/apple-touch-icon-ipad-76x76.png"> 
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-iphone-retina-120x120.png"> 
-    <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-ipad-retina-152x152.png"> 
-    <!-- Link to the manifest file -->
-    <link rel="manifest" href="/manifest.json">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <title>Weather App</title>
 
-    <!-- Bootstrap CSS w/ Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"> 
-</head> 
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+</head>
 <body class="bg-light text-dark">
   <div class="container text-center mt-4">
     <!-- Date Display with Icon -->
@@ -26,7 +20,7 @@
       <i class="bi bi-calendar"></i> <span id="currentDate"></span>
     </h5>
 
-    <h1 class="mb-3">Current Weather 🌤️</h1>
+    <h1 class="mb-3">Weather App 🌤️</h1>
 
     <!-- ZIP Code Search -->
     <div class="mb-3">
@@ -50,14 +44,6 @@
 
   <!-- JavaScript Code -->
   <script>
-    if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-        .then(reg => console.log("Service Worker registered", reg))
-        .catch(err => console.error("Service Worker registration failed", err));
-    });
-    }
-
     // Display the current date
     function displayCurrentDate() {
       const date = new Date();
@@ -89,6 +75,7 @@
 
         // Update the UI with the current weather data
         document.getElementById("cityName").innerText = name;
+        zipInput.value = name; // update the input field with the confirmed city name
         document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
         document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
         document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
