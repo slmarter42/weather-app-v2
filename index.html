@@ -101,32 +101,13 @@
 
     // Run default weather fetch for the default ZIP ("38501") when the page loads
     document.addEventListener("DOMContentLoaded", () => {
-    fetchWeather("38501");
+      fetchWeather("38501");
     });
-    let deferredPrompt;
 
-  window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault(); // Prevent Chrome from showing the default prompt
-  deferredPrompt = event;
-
-  // Show a custom install button
-  const installButton = document.createElement("button");
-  installButton.innerText = "Install App";
-  installButton.classList.add("btn", "btn-primary", "mt-3");
-  installButton.addEventListener("click", () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(choice => {
-        if (choice.outcome === "accepted") {
-          console.log("User accepted the install prompt");
-        } else {
-          console.log("User dismissed the install prompt");
-        }
-        deferredPrompt = null;
-      });
-    }
-  });
-
+    displayCurrentDate();
+  </script>
+</body>
+</html>
   document.body.appendChild(installButton);
 });
     displayCurrentDate();
