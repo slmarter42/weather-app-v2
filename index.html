@@ -27,7 +27,7 @@
       <i class="bi bi-calendar"></i> <span id="currentDate"></span>
     </h5>
 
-    <h1 class="mb-3">Weather App 🌤️</h1>
+    <h1 class="mb-3">Current Weather 🌤️</h1>
 
     <!-- ZIP Code Search -->
     <div class="mb-3">
@@ -82,7 +82,6 @@
 
         // Update the UI with the current weather data
         document.getElementById("cityName").innerText = name;
-        zipInput.value = name; // update the input field with the confirmed city name
         document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
         document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
         document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
